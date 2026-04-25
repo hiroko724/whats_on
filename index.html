@@ -570,7 +570,7 @@
       border-radius: 14px;
       padding: 12px 13px;
       outline: none;
-      font-size: 15px;
+      font-size: 16px;
     }
 
     input[type="date"] {
@@ -1297,8 +1297,12 @@
     }
 
     function closeModal(type) {
+      if (document.activeElement && typeof document.activeElement.blur === "function") {
+        document.activeElement.blur();
+      }
       if (type === "event") els.eventModalBackdrop.classList.remove("open");
       if (type === "list") els.listModalBackdrop.classList.remove("open");
+      window.setTimeout(() => window.scrollTo({ top: window.scrollY, left: 0 }), 0);
     }
 
     let isWeekAnimating = false;
@@ -1458,8 +1462,8 @@
 
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") {
-        els.eventModalBackdrop.classList.remove("open");
-        els.listModalBackdrop.classList.remove("open");
+        closeModal("event");
+        closeModal("list");
       }
     });
 
