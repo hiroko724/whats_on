@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>What’s On</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&family=Rubik:wght@400;500;600;700&display=swap');
+    :root {
+      --bg: #f8f4ee;
+      --surface: #ffffff;
+      --surface-soft: #fbfaf7;
+      --text: #202225;
+      --muted: #7b746d;
+      --border: #eee7dd;
+      --accent: #20282d;
+      --accent-soft: #e6f0ed;
+      --danger: #b85145;
+      --saturday: #4b8fc7;
+      --saturday-soft: #eaf4fb;
+      --sunday: #c85656;
+      --sunday-soft: #fff0f0;
+      --shadow: 0 12px 30px rgba(45, 40, 34, 0.08);
+      --calendar-circle: rgba(255, 255, 255, 0.72);
+      --radius-lg: 14px;
+      --radius-md: 14px;
+      --radius-sm: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Roboto", -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", "YuGothic", "Noto Sans JP", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    button,
+    input,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      border: none;
+      cursor: pointer;
+    }
+
+    .app {
+      max-width: 640px;
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: 28px 28px 36px;
+      background: radial-gradient(circle at 82% 6%, rgba(244, 214, 144, 0.32), transparent 22%), var(--bg);
+    }
+
+    .header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-family: "Rubik", "Roboto", -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: clamp(42px, 8vw, 58px);
+      line-height: 1;
+      letter-spacing: -0.055em;
+      font-weight: 400;
+    }
+
+    .date-subtitle {
+      margin: 0;
+      padding-left: 3px;
+      color: #5f5a54;
+      font-size: clamp(17px, 3.2vw, 22px);
+      line-height: 1.2;
+      letter-spacing: -0.025em;
+      font-weight: 420;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      padding-top: 2px;
+      flex-shrink: 0;
+    }
+
+    .text-button,
+    .icon-button,
+    .primary-button,
+    .ghost-button,
+    .danger-button {
+      border-radius: 999px;
+      transition: transform 0.15s ease, background 0.15s ease, opacity 0.15s ease;
+    }
+
+    .text-button {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 9px 13px;
+      font-size: 13px;
+      box-shadow: 0 4px 14px rgba(45, 40, 34, 0.05);
+    }
+
+    .list-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .list-icon {
+      width: 13px;
+      display: inline-grid;
+      gap: 3px;
+    }
+
+    .list-icon span {
+      display: block;
+      width: 13px;
+      height: 1.5px;
+      border-radius: 999px;
+      background: currentColor;
+    }
+
+    .icon-button {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      background: var(--accent);
+      color: #fff;
+      font-size: 22px;
+      line-height: 1;
+      box-shadow: 0 8px 18px rgba(47, 111, 100, 0.22);
+    }
+
+    .text-button:hover,
+    .icon-button:hover,
+    .primary-button:hover,
+    .ghost-button:hover,
+    .danger-button:hover {
+      transform: translateY(-1px);
+    }
+
+    .date-strip-wrap {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      padding: 6px 0 22px;
+      background: linear-gradient(var(--bg) 82%, rgba(248, 244, 238, 0));
+      margin-bottom: 8px;
+    }
+
+    .date-strip {
+      display: grid;
+      grid-template-columns: 28px 1fr 28px;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-day {
+      width: 28px;
+      height: 64px;
+      border-radius: 999px;
+      background: transparent;
+      color: rgba(32, 34, 37, 0.35);
+      font-size: 24px;
+    }
+
+    .days {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 10px;
+      align-items: end;
+    }
+
+    .day-chip {
+      min-height: 96px;
+      border-radius: 0;
+      background: transparent;
+      border: none;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 20px;
+      color: var(--muted);
+    }
+
+    .day-chip .dow {
+      font-size: clamp(14px, 2.8vw, 18px);
+      line-height: 1;
+      font-weight: 420;
+      color: #7d7770;
+    }
+
+    .day-chip .num {
+      width: clamp(50px, 9vw, 66px);
+      height: clamp(50px, 9vw, 66px);
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      background: var(--calendar-circle);
+      font-size: clamp(20px, 4.2vw, 26px);
+      line-height: 1;
+      font-weight: 430;
+      color: var(--text);
+      box-shadow: 0 14px 26px rgba(255, 255, 255, 0.35);
+    }
+
+    .day-chip.saturday {
+      background: transparent;
+    }
+
+    .day-chip.saturday .dow,
+    .day-chip.saturday .num {
+      color: var(--saturday);
+    }
+
+    .day-chip.sunday,
+    .day-chip.holiday {
+      background: transparent;
+    }
+
+    .day-chip.sunday .dow,
+    .day-chip.sunday .num,
+    .day-chip.holiday .dow,
+    .day-chip.holiday .num {
+      color: var(--sunday);
+    }
+
+    .day-chip.today {
+      border-color: transparent;
+    }
+
+    .day-chip.selected {
+      background: transparent;
+      color: var(--text);
+      border-color: transparent;
+      box-shadow: none;
+    }
+
+    .day-chip.selected .dow {
+      color: var(--text);
+      font-weight: 560;
+    }
+
+    .day-chip.selected .num {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 14px 26px rgba(32, 40, 45, 0.22);
+    }
+
+    .section-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin: 18px 2px 10px;
+      gap: 12px;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-size: 20px;
+      letter-spacing: -0.03em;
+      font-weight: 420;
+      color: #5f5a54;
+    }
+
+    .section-head span {
+      color: var(--muted);
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    .event-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .event-card {
+      position: relative;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px 16px 15px;
+      box-shadow: var(--shadow);
+      display: grid;
+      gap: 8px;
+      min-height: 104px;
+    }
+
+    .event-card.clickable {
+      cursor: pointer;
+    }
+
+    .event-main {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: start;
+    }
+
+    .event-title {
+      font-size: 17px;
+      line-height: 1.35;
+      font-weight: 680;
+      letter-spacing: -0.02em;
+      padding-right: 4px;
+    }
+
+    .count-label {
+      line-height: 1;
+      font-weight: 760;
+      color: var(--danger);
+      white-space: nowrap;
+      letter-spacing: -0.04em;
+      display: inline-flex;
+      align-items: baseline;
+      gap: 1px;
+    }
+
+    .count-prefix {
+      font-size: 13px;
+      font-weight: 620;
+      letter-spacing: -0.03em;
+    }
+
+    .count-number {
+      font-size: 21px;
+      font-weight: 760;
+      letter-spacing: -0.045em;
+    }
+
+    .count-unit {
+      font-size: 16px;
+      font-weight: 680;
+      letter-spacing: -0.035em;
+    }
+
+    .count-label.soon {
+      color: var(--danger);
+    }
+
+    .event-meta {
+      margin-top: -2px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+      font-weight: 600;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 10px;
+      padding-right: 36px;
+    }
+
+    .memo {
+      color: #5f5a52;
+      font-size: 12px;
+      line-height: 1.45;
+      padding-right: 36px;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+    }
+
+    .edit-button {
+      position: absolute;
+      right: 12px;
+      bottom: 12px;
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      background: var(--surface-soft);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 15px;
+      display: grid;
+      place-items: center;
+    }
+
+    .empty {
+      background: rgba(255, 255, 255, 0.58);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px 18px;
+      text-align: center;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .empty strong {
+      display: block;
+      color: var(--text);
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(20, 18, 15, 0.28);
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 14px;
+      z-index: 20;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+      animation: backdropFadeIn 0.22s ease-out both;
+    }
+
+    .modal-backdrop.open .modal {
+      animation: modalFloatUp 0.34s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    @keyframes backdropFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes modalFloatUp {
+      from {
+        opacity: 0;
+        transform: translateY(28px) scale(0.98);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .modal-backdrop.open,
+      .modal-backdrop.open .modal {
+        animation: none;
+      }
+    }
+
+    .modal {
+      width: min(560px, 100%);
+      max-height: 88vh;
+      overflow: auto;
+      background: var(--surface);
+      border-radius: 28px;
+      box-shadow: 0 24px 70px rgba(20, 18, 15, 0.22);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      padding: 18px;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .modal-header h3 {
+      margin: 0;
+      font-size: 20px;
+      letter-spacing: -0.03em;
+    }
+
+    .close-button {
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      background: var(--surface-soft);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 20px;
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      background: var(--surface-soft);
+      color: var(--text);
+      border-radius: 14px;
+      padding: 12px 13px;
+      outline: none;
+      font-size: 15px;
+    }
+
+    textarea {
+      min-height: 88px;
+      resize: vertical;
+    }
+
+    input:focus,
+    textarea:focus {
+      border-color: rgba(47, 111, 100, 0.45);
+      box-shadow: 0 0 0 3px rgba(47, 111, 100, 0.09);
+    }
+
+    .two-cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .left-actions,
+    .right-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .primary-button,
+    .ghost-button,
+    .danger-button {
+      padding: 11px 15px;
+      font-size: 14px;
+    }
+
+    .primary-button {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .ghost-button {
+      background: var(--surface-soft);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .danger-button {
+      background: #fff1ef;
+      color: var(--danger);
+      border: 1px solid #f2cac4;
+    }
+
+    .utility-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 20px;
+      transform: translateX(-50%) translateY(20px);
+      background: rgba(35, 32, 28, 0.92);
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      z-index: 40;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .hidden-file {
+      display: none;
+    }
+
+    @media (max-width: 430px) {
+      .app {
+        padding: 24px 14px 32px;
+      }
+
+      .header {
+        gap: 10px;
+        margin-bottom: 36px;
+      }
+
+      .brand h1 {
+        font-size: 34px;
+        font-weight: 520;
+        letter-spacing: -0.055em;
+      }
+
+      .date-subtitle {
+        font-size: 16px;
+      }
+
+      .header-actions {
+        gap: 6px;
+      }
+
+      .text-button {
+        padding: 8px 10px;
+        font-size: 12px;
+      }
+
+      .icon-button {
+        width: 36px;
+        height: 36px;
+        font-size: 22px;
+      }
+
+      .date-strip-wrap {
+        padding: 4px 0 18px;
+      }
+
+      .date-strip {
+        grid-template-columns: 14px 1fr 14px;
+        gap: 2px;
+      }
+
+      .nav-day {
+        width: 14px;
+        height: 58px;
+        font-size: 22px;
+        padding: 0;
+      }
+
+      .days {
+        gap: 6px;
+      }
+
+      .day-chip {
+        min-height: 74px;
+        gap: 14px;
+        padding-inline: 0;
+      }
+
+      .day-chip .dow {
+        font-size: 14px;
+      }
+
+      .day-chip .num {
+        width: 43px;
+        height: 43px;
+        font-size: 20px;
+      }
+
+      .section-head {
+        margin: 14px 4px 10px;
+      }
+
+      .event-card {
+        min-height: auto;
+        padding: 18px 16px 16px;
+        gap: 11px;
+      }
+
+      .event-main {
+        gap: 10px;
+      }
+
+      .event-title {
+        font-size: 17px;
+        line-height: 1.35;
+      }
+
+      .count-prefix {
+        font-size: 12px;
+      }
+
+      .count-number {
+        font-size: 20px;
+      }
+
+      .count-unit {
+        font-size: 15px;
+      }
+
+      .event-meta {
+        font-size: 13px;
+        padding-right: 34px;
+      }
+
+      .memo {
+        padding-right: 34px;
+      }
+
+      .two-cols {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="header">
+      <div class="brand">
+        <h1 id="monthTitle"></h1>
+      </div>
+      <div class="header-actions">
+        <button class="text-button" id="todayButton">Today</button>
+        <button class="text-button list-button" id="openListButton" aria-label="イベント一覧を開く"><span class="list-icon" aria-hidden="true"><span></span><span></span><span></span></span><span>List</span></button>
+        <button class="icon-button" id="addButton" aria-label="イベントを追加">＋</button>
+      </div>
+    </header>
+
+    <div class="date-strip-wrap">
+      <div class="date-strip">
+        <button class="nav-day" id="prevWeekButton" aria-label="前の7日へ">‹</button>
+        <div class="days" id="days"></div>
+        <button class="nav-day" id="nextWeekButton" aria-label="次の7日へ">›</button>
+      </div>
+    </div>
+
+    <section>
+      <div class="section-head">
+        <h2 id="selectedDateTitle"></h2>
+        <span id="eventCount"></span>
+      </div>
+      <div class="event-list" id="eventList"></div>
+    </section>
+  </main>
+
+  <div class="modal-backdrop" id="eventModalBackdrop">
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="eventModalTitle">
+      <div class="modal-header">
+        <h3 id="eventModalTitle">イベントを追加</h3>
+        <button class="close-button" data-close-modal="event">×</button>
+      </div>
+      <form id="eventForm" class="form-grid">
+        <input type="hidden" id="eventId" />
+        <label>
+          イベント名 *
+          <input id="titleInput" required placeholder="例：△△マーケット" />
+        </label>
+        <div class="two-cols">
+          <label>
+            開始日 *
+            <input id="startInput" type="date" required />
+          </label>
+          <label>
+            終了日 *
+            <input id="endInput" type="date" required />
+          </label>
+        </div>
+        <label>
+          場所
+          <input id="placeInput" placeholder="例：吉祥寺" />
+        </label>
+        <label>
+          URL
+          <input id="urlInput" type="url" placeholder="https://example.com" />
+        </label>
+        <label>
+          メモ
+          <textarea id="memoInput" placeholder="SNSで見かけた。週末候補。"></textarea>
+        </label>
+        <div class="modal-actions">
+          <div class="left-actions">
+            <button type="button" class="danger-button" id="deleteButton">削除</button>
+          </div>
+          <div class="right-actions">
+            <button type="button" class="ghost-button" data-close-modal="event">キャンセル</button>
+            <button type="submit" class="primary-button">保存</button>
+          </div>
+        </div>
+      </form>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" id="listModalBackdrop">
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="listModalTitle">
+      <div class="modal-header">
+        <h3 id="listModalTitle">イベント一覧</h3>
+        <button class="close-button" data-close-modal="list">×</button>
+      </div>
+      <div class="event-list" id="allEventList"></div>
+      <div class="utility-row">
+        <button class="ghost-button" id="exportButton">エクスポート</button>
+        <button class="ghost-button" id="importButton">インポート</button>
+        <input class="hidden-file" id="importFile" type="file" accept="application/json" />
+      </div>
+    </section>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const STORAGE_KEY = "whats-on-events-v1";
+    const DAY_MS = 24 * 60 * 60 * 1000;
+
+    const els = {
+      days: document.getElementById("days"),
+      selectedDateTitle: document.getElementById("selectedDateTitle"),
+      eventCount: document.getElementById("eventCount"),
+      dateSubtitle: document.getElementById("monthTitle"),
+      eventList: document.getElementById("eventList"),
+      allEventList: document.getElementById("allEventList"),
+      prevWeekButton: document.getElementById("prevWeekButton"),
+      nextWeekButton: document.getElementById("nextWeekButton"),
+      addButton: document.getElementById("addButton"),
+      openListButton: document.getElementById("openListButton"),
+      todayButton: document.getElementById("todayButton"),
+      eventModalBackdrop: document.getElementById("eventModalBackdrop"),
+      listModalBackdrop: document.getElementById("listModalBackdrop"),
+      eventForm: document.getElementById("eventForm"),
+      eventModalTitle: document.getElementById("eventModalTitle"),
+      eventId: document.getElementById("eventId"),
+      titleInput: document.getElementById("titleInput"),
+      startInput: document.getElementById("startInput"),
+      endInput: document.getElementById("endInput"),
+      placeInput: document.getElementById("placeInput"),
+      urlInput: document.getElementById("urlInput"),
+      memoInput: document.getElementById("memoInput"),
+      deleteButton: document.getElementById("deleteButton"),
+      exportButton: document.getElementById("exportButton"),
+      importButton: document.getElementById("importButton"),
+      importFile: document.getElementById("importFile"),
+      toast: document.getElementById("toast"),
+    };
+
+    let events = loadEvents();
+    let selectedDate = today();
+    let stripStartDate = startOfWeekMonday(today());
+
+    function today() {
+      const now = new Date();
+      return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    }
+
+    function parseDate(value) {
+      const [year, month, day] = value.split("-").map(Number);
+      return new Date(year, month - 1, day);
+    }
+
+    function toDateInputValue(date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, "0");
+      const d = String(date.getDate()).padStart(2, "0");
+      return `${y}-${m}-${d}`;
+    }
+
+    function addDays(date, days) {
+      const next = new Date(date);
+      next.setDate(next.getDate() + days);
+      return next;
+    }
+
+    function startOfWeekMonday(date) {
+      const base = startOfDay(date);
+      const day = base.getDay();
+      const diffFromMonday = (day + 6) % 7;
+      return addDays(base, -diffFromMonday);
+    }
+
+    function diffDays(from, to) {
+      return Math.round((startOfDay(to) - startOfDay(from)) / DAY_MS);
+    }
+
+    function startOfDay(date) {
+      return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    }
+
+    function isSameDay(a, b) {
+      return toDateInputValue(a) === toDateInputValue(b);
+    }
+
+    function formatShortDate(date) {
+      return `${date.getMonth() + 1}/${date.getDate()}`;
+    }
+
+    function formatFullDate(date) {
+      return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
+    }
+
+    function formatTitleDate(date) {
+      return `${date.getMonth() + 1}/${date.getDate()} ${formatDow(date)}`;
+    }
+
+    function formatFullEnglishDate(date) {
+      const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      return `${months[date.getMonth()]} ${date.getFullYear()}`;
+    }
+
+    function formatDow(date) {
+      return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][date.getDay()];
+    }
+
+    function nthMonday(year, monthIndex, nth) {
+      const first = new Date(year, monthIndex, 1);
+      const firstMondayOffset = (8 - first.getDay()) % 7;
+      return new Date(year, monthIndex, 1 + firstMondayOffset + (nth - 1) * 7);
+    }
+
+    function vernalEquinoxDay(year) {
+      return Math.floor(20.8431 + 0.242194 * (year - 1980) - Math.floor((year - 1980) / 4));
+    }
+
+    function autumnalEquinoxDay(year) {
+      return Math.floor(23.2488 + 0.242194 * (year - 1980) - Math.floor((year - 1980) / 4));
+    }
+
+    function getJapaneseHolidayName(date) {
+      const target = toDateInputValue(date);
+      const year = date.getFullYear();
+      const holidays = new Map();
+      const addHoliday = (d, name) => holidays.set(toDateInputValue(d), name);
+
+      addHoliday(new Date(year, 0, 1), "元日");
+      addHoliday(nthMonday(year, 0, 2), "成人の日");
+      addHoliday(new Date(year, 1, 11), "建国記念の日");
+      addHoliday(new Date(year, 1, 23), "天皇誕生日");
+      addHoliday(new Date(year, 2, vernalEquinoxDay(year)), "春分の日");
+      addHoliday(new Date(year, 3, 29), "昭和の日");
+      addHoliday(new Date(year, 4, 3), "憲法記念日");
+      addHoliday(new Date(year, 4, 4), "みどりの日");
+      addHoliday(new Date(year, 4, 5), "こどもの日");
+      addHoliday(nthMonday(year, 6, 3), "海の日");
+      addHoliday(new Date(year, 7, 11), "山の日");
+      addHoliday(nthMonday(year, 8, 3), "敬老の日");
+      addHoliday(new Date(year, 8, autumnalEquinoxDay(year)), "秋分の日");
+      addHoliday(nthMonday(year, 9, 2), "スポーツの日");
+      addHoliday(new Date(year, 10, 3), "文化の日");
+      addHoliday(new Date(year, 10, 23), "勤労感謝の日");
+
+      const sortedKeys = [...holidays.keys()].sort();
+      sortedKeys.forEach((key) => {
+        const holidayDate = parseDate(key);
+        if (holidayDate.getDay() === 0) {
+          let substitute = addDays(holidayDate, 1);
+          while (holidays.has(toDateInputValue(substitute))) {
+            substitute = addDays(substitute, 1);
+          }
+          addHoliday(substitute, "振替休日");
+        }
+      });
+
+      const allKeys = [...holidays.keys()].sort();
+      for (let i = 0; i < allKeys.length - 1; i += 1) {
+        const current = parseDate(allKeys[i]);
+        const next = parseDate(allKeys[i + 1]);
+        if (diffDays(current, next) === 2) {
+          const inBetween = addDays(current, 1);
+          const key = toDateInputValue(inBetween);
+          if (!holidays.has(key)) addHoliday(inBetween, "国民の休日");
+        }
+      }
+
+      return holidays.get(target) || "";
+    }
+
+    function formatRemainingFrom(baseDate, endDateValue) {
+      const days = diffDays(baseDate, parseDate(endDateValue));
+      if (days === 0) return "残り0日";
+      return `残り${days}日`;
+    }
+
+    function formatListCountdown(event) {
+      const now = today();
+      const start = parseDate(event.startDate);
+      const end = parseDate(event.endDate);
+
+      if (now < start) {
+        const days = diffDays(now, start);
+        return days === 0 ? "今日から" : `あと${days}日`;
+      }
+      return formatRemainingFrom(now, event.endDate);
+    }
+
+    function normalizeUrl(url) {
+      const trimmed = url.trim();
+      if (!trimmed) return "";
+      if (/^https?:\/\//i.test(trimmed)) return trimmed;
+      return `https://${trimmed}`;
+    }
+
+    function loadEvents() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function saveEvents() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(events));
+    }
+
+    function showToast(message) {
+      els.toast.textContent = message;
+      els.toast.classList.add("show");
+      window.setTimeout(() => els.toast.classList.remove("show"), 1800);
+    }
+
+    function getEventsForDate(date) {
+      return events
+        .filter((event) => {
+          const start = parseDate(event.startDate);
+          const end = parseDate(event.endDate);
+          return start <= date && date <= end;
+        })
+        .sort((a, b) => parseDate(a.endDate) - parseDate(b.endDate));
+    }
+
+    function getFutureRelatedEvents() {
+      const now = today();
+      return events
+        .filter((event) => parseDate(event.endDate) >= now)
+        .sort((a, b) => {
+          const aStart = parseDate(a.startDate);
+          const bStart = parseDate(b.startDate);
+          const aEnd = parseDate(a.endDate);
+          const bEnd = parseDate(b.endDate);
+          const aOngoing = aStart <= now && now <= aEnd;
+          const bOngoing = bStart <= now && now <= bEnd;
+
+          if (aOngoing && !bOngoing) return -1;
+          if (!aOngoing && bOngoing) return 1;
+          if (aOngoing && bOngoing) return aEnd - bEnd;
+          return aStart - bStart;
+        });
+    }
+
+    function render() {
+      renderDateStrip();
+      renderSelectedDateEvents();
+      renderListModalEvents();
+    }
+
+    function renderDateStrip() {
+      els.days.innerHTML = "";
+      for (let i = 0; i < 7; i += 1) {
+        const date = addDays(stripStartDate, i);
+        const button = document.createElement("button");
+        button.className = "day-chip";
+        const holidayName = getJapaneseHolidayName(date);
+        if (date.getDay() === 6) button.classList.add("saturday");
+        if (date.getDay() === 0) button.classList.add("sunday");
+        if (holidayName) button.classList.add("holiday");
+        if (isSameDay(date, today())) button.classList.add("today");
+        if (isSameDay(date, selectedDate)) button.classList.add("selected");
+        button.title = holidayName || "";
+        button.innerHTML = `<span class="dow">${formatDow(date)}</span><span class="num">${date.getDate()}</span>`;
+        button.addEventListener("click", () => {
+          selectedDate = date;
+          render();
+        });
+        els.days.appendChild(button);
+      }
+    }
+
+    function renderSelectedDateEvents() {
+      const targetEvents = getEventsForDate(selectedDate);
+      els.dateSubtitle.textContent = formatFullEnglishDate(selectedDate);
+      els.selectedDateTitle.textContent = formatTitleDate(selectedDate);
+      els.eventCount.textContent = `${targetEvents.length}件`;
+      els.eventList.innerHTML = "";
+
+      if (targetEvents.length === 0) {
+        els.eventList.innerHTML = `
+          <div class="empty">
+            <strong>この日のイベントはありません</strong>
+            イベントを見つけたら、右上の＋から登録できます。
+          </div>
+        `;
+        return;
+      }
+
+      targetEvents.forEach((event) => {
+        els.eventList.appendChild(createEventCard(event, {
+          countdown: formatRemainingFrom(selectedDate, event.endDate),
+          metaDate: `${formatFullDate(parseDate(event.endDate))}まで`,
+        }));
+      });
+    }
+
+    function renderListModalEvents() {
+      const listEvents = getFutureRelatedEvents();
+      els.allEventList.innerHTML = "";
+
+      if (listEvents.length === 0) {
+        els.allEventList.innerHTML = `
+          <div class="empty">
+            <strong>今日以降のイベントはありません</strong>
+            新しいイベントを登録すると、ここに一覧で表示されます。
+          </div>
+        `;
+        return;
+      }
+
+      listEvents.forEach((event) => {
+        const now = today();
+        const start = parseDate(event.startDate);
+        const isUpcoming = now < start;
+        els.allEventList.appendChild(createEventCard(event, {
+          countdown: formatListCountdown(event),
+          metaDate: isUpcoming
+            ? `${formatFullDate(start)}から`
+            : `${formatFullDate(parseDate(event.endDate))}まで`,
+        }));
+      });
+    }
+
+    function createEventCard(event, options) {
+      const card = document.createElement("article");
+      card.className = "event-card";
+      if (event.url) card.classList.add("clickable");
+
+      const countClass = options.countdown.includes("残り0日") || options.countdown.includes("残り1日") ? "soon" : "";
+      const place = event.place ? `📍${escapeHtml(event.place)}` : "";
+      const memo = event.memo ? `<div class="memo">${escapeHtml(event.memo)}</div>` : "";
+
+      card.innerHTML = `
+        <div class="event-main">
+          <div class="event-title">${escapeHtml(event.title)}</div>
+          <div class="count-label ${countClass}">${formatCountdownHtml(options.countdown)}</div>
+        </div>
+        <div class="event-meta">
+          <span>${escapeHtml(options.metaDate)}</span>
+          ${place ? `<span>${place}</span>` : ""}
+        </div>
+        ${memo}
+        <button class="edit-button" aria-label="編集">✎</button>
+      `;
+
+      card.addEventListener("click", () => {
+        if (!event.url) {
+          showToast("URL未登録です");
+          return;
+        }
+        window.open(event.url, "_blank", "noopener,noreferrer");
+      });
+
+      card.querySelector(".edit-button").addEventListener("click", (e) => {
+        e.stopPropagation();
+        openEventModal(event);
+      });
+
+      return card;
+    }
+
+    function formatCountdownHtml(value) {
+      const text = String(value);
+      const match = text.match(/^(残り|あと)([0-9]+)(日)$/);
+      if (!match) return escapeHtml(text);
+      const prefix = escapeHtml(match[1]);
+      const number = escapeHtml(match[2]);
+      const unit = escapeHtml(match[3]);
+      return '<span class="count-prefix">' + prefix + '</span><span class="count-number">' + number + '</span><span class="count-unit">' + unit + '</span>';
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function openEventModal(event = null) {
+      els.eventForm.reset();
+      if (event) {
+        els.eventModalTitle.textContent = "イベントを編集";
+        els.eventId.value = event.id;
+        els.titleInput.value = event.title;
+        els.startInput.value = event.startDate;
+        els.endInput.value = event.endDate;
+        els.placeInput.value = event.place || "";
+        els.urlInput.value = event.url || "";
+        els.memoInput.value = event.memo || "";
+        els.deleteButton.style.display = "inline-flex";
+      } else {
+        els.eventModalTitle.textContent = "イベントを追加";
+        els.eventId.value = "";
+        els.startInput.value = toDateInputValue(selectedDate);
+        els.endInput.value = toDateInputValue(selectedDate);
+        els.deleteButton.style.display = "none";
+      }
+      els.eventModalBackdrop.classList.add("open");
+      window.setTimeout(() => els.titleInput.focus(), 80);
+    }
+
+    function closeModal(type) {
+      if (type === "event") els.eventModalBackdrop.classList.remove("open");
+      if (type === "list") els.listModalBackdrop.classList.remove("open");
+    }
+
+    els.prevWeekButton.addEventListener("click", () => {
+      stripStartDate = addDays(stripStartDate, -7);
+      selectedDate = stripStartDate;
+      render();
+    });
+
+    els.nextWeekButton.addEventListener("click", () => {
+      stripStartDate = addDays(stripStartDate, 7);
+      selectedDate = stripStartDate;
+      render();
+    });
+
+    els.addButton.addEventListener("click", () => openEventModal());
+
+    els.todayButton.addEventListener("click", () => {
+      selectedDate = today();
+      stripStartDate = startOfWeekMonday(selectedDate);
+      render();
+    });
+
+    els.openListButton.addEventListener("click", () => {
+      renderListModalEvents();
+      els.listModalBackdrop.classList.add("open");
+    });
+
+    document.querySelectorAll("[data-close-modal]").forEach((button) => {
+      button.addEventListener("click", () => closeModal(button.dataset.closeModal));
+    });
+
+    [els.eventModalBackdrop, els.listModalBackdrop].forEach((backdrop) => {
+      backdrop.addEventListener("click", (e) => {
+        if (e.target === backdrop) backdrop.classList.remove("open");
+      });
+    });
+
+    els.eventForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const startDate = els.startInput.value;
+      const endDate = els.endInput.value;
+
+      if (parseDate(startDate) > parseDate(endDate)) {
+        showToast("終了日は開始日以降にしてください");
+        return;
+      }
+
+      const existingId = els.eventId.value;
+      const data = {
+        id: existingId || crypto.randomUUID(),
+        title: els.titleInput.value.trim(),
+        startDate,
+        endDate,
+        place: els.placeInput.value.trim(),
+        url: normalizeUrl(els.urlInput.value),
+        memo: els.memoInput.value.trim(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      if (existingId) {
+        events = events.map((event) => (event.id === existingId ? data : event));
+      } else {
+        events.push(data);
+      }
+
+      saveEvents();
+      closeModal("event");
+      render();
+      showToast("保存しました");
+    });
+
+    els.deleteButton.addEventListener("click", () => {
+      const id = els.eventId.value;
+      if (!id) return;
+      if (!confirm("このイベントを削除しますか？")) return;
+      events = events.filter((event) => event.id !== id);
+      saveEvents();
+      closeModal("event");
+      render();
+      showToast("削除しました");
+    });
+
+    els.exportButton.addEventListener("click", () => {
+      const blob = new Blob([JSON.stringify(events, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `whats-on-events-${toDateInputValue(today())}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    els.importButton.addEventListener("click", () => els.importFile.click());
+
+    els.importFile.addEventListener("change", async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      try {
+        const text = await file.text();
+        const imported = JSON.parse(text);
+        if (!Array.isArray(imported)) throw new Error("Invalid JSON");
+        events = imported.filter((event) => event.title && event.startDate && event.endDate);
+        saveEvents();
+        render();
+        showToast("読み込みました");
+      } catch (error) {
+        showToast("JSONを読み込めませんでした");
+      } finally {
+        els.importFile.value = "";
+      }
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        els.eventModalBackdrop.classList.remove("open");
+        els.listModalBackdrop.classList.remove("open");
+      }
+    });
+
+    render();
+  </script>
+</body>
+</html>
