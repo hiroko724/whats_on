@@ -494,6 +494,7 @@
     }
 
     .form-grid {
+      min-width: 0;
       display: grid;
       gap: 12px;
     }
@@ -510,6 +511,7 @@
     textarea {
       min-width: 0;
       max-width: 100%;
+      inline-size: 100%;
       width: 100%;
       border: 1px solid var(--border);
       background: var(--surface-soft);
@@ -518,6 +520,17 @@
       padding: 12px 13px;
       outline: none;
       font-size: 15px;
+    }
+
+    input[type="date"] {
+      display: block;
+      -webkit-appearance: none;
+      appearance: none;
+      box-sizing: border-box;
+    }
+
+    input[type="date"]::-webkit-date-and-time-value {
+      text-align: center;
     }
 
     textarea {
@@ -533,9 +546,16 @@
 
     .two-cols {
       min-width: 0;
+      width: 100%;
       display: grid;
       grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
       gap: 10px;
+    }
+
+    .two-cols label,
+    .two-cols input {
+      min-width: 0;
+      max-width: 100%;
     }
 
     .modal-actions {
@@ -722,6 +742,12 @@
 
       .two-cols {
         grid-template-columns: minmax(0, 1fr);
+        gap: 12px;
+      }
+
+      input[type="date"] {
+        width: 100%;
+        inline-size: 100%;
       }
     }
   </style>
