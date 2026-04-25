@@ -1250,17 +1250,41 @@
       if (type === "list") els.listModalBackdrop.classList.remove("open");
     }
 
-    els.prevWeekButton.addEventListener("click", () => {
-      stripStartDate = addDays(stripStartDate, -7);
+    function moveWeek(direction) {
+      stripStartDate = addDays(stripStartDate, direction * 7);
       selectedDate = stripStartDate;
       render();
-    });
+    }
 
-    els.nextWeekButton.addEventListener("click", () => {
-      stripStartDate = addDays(stripStartDate, 7);
-      selectedDate = stripStartDate;
-      render();
-    });
+    els.prevWeekButton.addEventListener("click", () => moveWeek(-1));
+
+    els.nextWeekButton.addEventListener("click", () => moveWeek(1));
+
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchEndX = 0;
+    let touchEndY = 0;
+
+    els.days.addEventListener("touchstart", (e) => {
+      const touch = e.changedTouches[0];
+      touchStartX = touch.clientX;
+      touchStartY = touch.clientY;
+    }, { passive: true });
+
+    els.days.addEventListener("touchend", (e) => {
+      const touch = e.changedTouches[0];
+      touchEndX = touch.clientX;
+      touchEndY = touch.clientY;
+
+      const diffX = touchEndX - touchStartX;
+      const diffY = touchEndY - touchStartY;
+      const isHorizontalSwipe = Math.abs(diffX) > 45 && Math.abs(diffX) > Math.abs(diffY) * 1.4;
+
+      if (!isHorizontalSwipe) return;
+
+      if (diffX < 0) moveWeek(1);
+      if (diffX > 0) moveWeek(-1);
+    }, { passive: true });
 
     els.addButton.addEventListener("click", () => openEventModal());
 
