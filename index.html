@@ -189,6 +189,44 @@
       grid-template-columns: repeat(7, minmax(0, 1fr));
       gap: 10px;
       align-items: end;
+      touch-action: pan-y;
+      will-change: transform, opacity;
+    }
+
+    .days.slide-out-left {
+      animation: weekSlideOutLeft 0.18s ease-in both;
+    }
+
+    .days.slide-out-right {
+      animation: weekSlideOutRight 0.18s ease-in both;
+    }
+
+    .days.slide-in-left {
+      animation: weekSlideInLeft 0.24s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    .days.slide-in-right {
+      animation: weekSlideInRight 0.24s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    @keyframes weekSlideOutLeft {
+      from { opacity: 1; transform: translateX(0); }
+      to { opacity: 0; transform: translateX(-34px); }
+    }
+
+    @keyframes weekSlideOutRight {
+      from { opacity: 1; transform: translateX(0); }
+      to { opacity: 0; transform: translateX(34px); }
+    }
+
+    @keyframes weekSlideInLeft {
+      from { opacity: 0; transform: translateX(34px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes weekSlideInRight {
+      from { opacity: 0; transform: translateX(-34px); }
+      to { opacity: 1; transform: translateX(0); }
     }
 
     .day-chip {
@@ -453,7 +491,11 @@
 
     @media (prefers-reduced-motion: reduce) {
       .modal-backdrop.open,
-      .modal-backdrop.open .modal {
+      .modal-backdrop.open .modal,
+      .days.slide-out-left,
+      .days.slide-out-right,
+      .days.slide-in-left,
+      .days.slide-in-right {
         animation: none;
       }
     }
@@ -1250,10 +1292,30 @@
       if (type === "list") els.listModalBackdrop.classList.remove("open");
     }
 
+    let isWeekAnimating = false;
+
     function moveWeek(direction) {
-      stripStartDate = addDays(stripStartDate, direction * 7);
-      selectedDate = stripStartDate;
-      render();
+      if (isWeekAnimating) return;
+      isWeekAnimating = true;
+
+      const outClass = direction > 0 ? "slide-out-left" : "slide-out-right";
+      const inClass = direction > 0 ? "slide-in-left" : "slide-in-right";
+
+      els.days.classList.remove("slide-out-left", "slide-out-right", "slide-in-left", "slide-in-right");
+      els.days.classList.add(outClass);
+
+      window.setTimeout(() => {
+        stripStartDate = addDays(stripStartDate, direction * 7);
+        selectedDate = stripStartDate;
+        render();
+        els.days.classList.remove(outClass);
+        els.days.classList.add(inClass);
+
+        window.setTimeout(() => {
+          els.days.classList.remove(inClass);
+          isWeekAnimating = false;
+        }, 260);
+      }, 180);
     }
 
     els.prevWeekButton.addEventListener("click", () => moveWeek(-1));
