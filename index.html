@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>What’s On</title>
+  <link rel="apple-touch-icon" sizes="180x180" href="icon.png" />
+  <link rel="icon" type="image/png" href="icon.png" />
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&family=Rubik:wght@400;500;600;700&display=swap');
     :root {
@@ -497,6 +499,7 @@
     }
 
     label {
+      min-width: 0;
       display: grid;
       gap: 6px;
       color: var(--muted);
@@ -505,6 +508,8 @@
 
     input,
     textarea {
+      min-width: 0;
+      max-width: 100%;
       width: 100%;
       border: 1px solid var(--border);
       background: var(--surface-soft);
@@ -527,8 +532,9 @@
     }
 
     .two-cols {
+      min-width: 0;
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
       gap: 10px;
     }
 
@@ -715,7 +721,7 @@
       }
 
       .two-cols {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
       }
     }
   </style>
